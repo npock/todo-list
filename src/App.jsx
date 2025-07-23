@@ -9,11 +9,12 @@ import {
 export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [toDos, setToDos] = useState([]);
+  const [sort, setSort] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [inputs, setInputs] = useState({
     addTodo: "",
     searchToDo: "",
   });
-  const [sort, setSort] = useState(false);
 
   const handleChange = (e) => {
     const { value, name } = e.target;
@@ -24,17 +25,10 @@ export const App = () => {
     setToDos(todos);
   };
 
-  const sortedToDos = toDos.slice().sort((a, b) => {
-    const aValue = a.title;
-    const bValue = b.title;
-    return aValue.localeCompare(bValue);
-  });
-
   const handleSort = () => {
     if (sort) {
       setSort(false);
     } else {
-      setToDos(sortedToDos);
       setSort(true);
     }
   };
@@ -44,10 +38,37 @@ export const App = () => {
     fetch("http://localhost:3000/TodoList")
       .then((loadedData) => loadedData.json())
       .then((loadedToDos) => {
-        changeToDosList(loadedToDos);
+        const result = loadedToDos.filter(({ title, id }) => {
+          let regex = new RegExp(
+            `\\b(${inputs.searchToDo}|${inputs.searchToDo}\\w*)\\b`,
+            "i"
+          );
+          let resultRegex = regex.test(title);
+          if (resultRegex) {
+            return { title, id };
+          }
+        });
+        if (inputs.searchToDo !== "") {
+          if (result.length === 0) {
+            setNotFound(true);
+          } else {
+            setNotFound(false);
+          }
+          changeToDosList(result);
+        } else if (sort) {
+          const sortedToDos = loadedToDos.slice().sort((a, b) => {
+            const aValue = a.title;
+            const bValue = b.title;
+            return aValue.localeCompare(bValue);
+          });
+
+          changeToDosList(sortedToDos);
+        } else {
+          changeToDosList(loadedToDos);
+        }
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [inputs, sort]);
 
   return (
     <>
@@ -67,17 +88,21 @@ export const App = () => {
           label="searchToDo"
           placeholder="Поиск..."
           type="text"
+          notFound={notFound}
           value={inputs.searchToDo}
-          changeToDosList={changeToDosList}
           onChange={handleChange}
-        ></FormSearchToDo>
+        />
         <ButtonSort handleSort={handleSort} />
         {isLoading ? (
           <div>...loading</div>
         ) : (
           <ul>
             {toDos.map((todo) => (
-              <ItemList todo={todo} changeToDosList={changeToDosList} />
+              <ItemList
+                key={todo.id}
+                todo={todo}
+                changeToDosList={changeToDosList}
+              />
             ))}
           </ul>
         )}

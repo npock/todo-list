@@ -42,9 +42,10 @@ export const ItemList = ({ todo, changeToDosList }) => {
       })
       .finally();
   };
+
   return (
     <>
-      <li key={todo.id}>
+      <li>
         {changeToDo ? (
           <>
             <form onSubmit={() => requestUpdate(todo)}>
