@@ -2,7 +2,7 @@ export const FormCreateToDo = ({ createToDo, inputs, handleChange }) => {
   return (
     <form onSubmit={createToDo}>
       <input
-        name={name}
+        name="newToDo"
         placeholder="whrite important toDo..."
         value={inputs.newToDo}
         onChange={handleChange}
