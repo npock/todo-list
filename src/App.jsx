@@ -1,111 +1,173 @@
 import { useState, useEffect } from "react";
-import {
-  ItemList,
-  FormAddToDo,
-  FormSearchToDo,
-  ButtonSort,
-} from "./components";
+import { searchToDos, sortedToDos } from "./utils";
+import { ToDoItem, FormCreateToDo, FormSearchSortToDo } from "./components";
 
 export const App = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [toDos, setToDos] = useState([]);
-  const [sort, setSort] = useState(false);
-  const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [inputs, setInputs] = useState({
-    addTodo: "",
+    newToDo: "",
     searchToDo: "",
   });
+  const [search, setSearh] = useState(false);
+  const [isSearch, setIsSearch] = useState(false);
+  const [sort, setSort] = useState(false);
+  const [cancel, setCancel] = useState(false);
 
-  const handleChange = (e) => {
-    const { value, name } = e.target;
-    setInputs({ ...inputs, [name]: value });
-  };
+  const fetchToDos = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/TodoList");
+      if (!response.ok) {
+        throw new Error("Ошибка в запросе на сервер");
+      }
+      const data = await response.json();
+      if (isSearch) {
+        setIsSearch(false);
 
-  const changeToDosList = (todos) => {
-    setToDos(todos);
-  };
+        setToDos(searchToDos(data, inputs));
+      } else {
+        if (sort) {
+          setToDos(sortedToDos(data));
+        } else {
+          setToDos(data);
+        }
+      }
 
-  const handleSort = () => {
-    if (sort) {
-      setSort(false);
-    } else {
-      setSort(true);
+      setIsLoading(false);
+    } catch (error) {
+      setError(error);
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetch("http://localhost:3000/TodoList")
-      .then((loadedData) => loadedData.json())
-      .then((loadedToDos) => {
-        const result = loadedToDos.filter(({ title, id }) => {
-          let regex = new RegExp(
-            `\\b(${inputs.searchToDo}|${inputs.searchToDo}\\w*)\\b`,
-            "i"
-          );
-          let resultRegex = regex.test(title);
-          if (resultRegex) {
-            return { title, id };
-          }
-        });
-        if (inputs.searchToDo !== "") {
-          if (result.length === 0) {
-            setNotFound(true);
-          } else {
-            setNotFound(false);
-          }
-          changeToDosList(result);
-        } else if (sort) {
-          const sortedToDos = loadedToDos.slice().sort((a, b) => {
-            const aValue = a.title;
-            const bValue = b.title;
-            return aValue.localeCompare(bValue);
-          });
+  const updateToDo = async (id, payload) => {
+    try {
+      const response = await fetch(`http://localhost:3000/TodoList/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+        body: JSON.stringify({
+          ...payload,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Ошибка в запросе на сервер");
+      }
+      const newTodo = await response.json();
 
-          changeToDosList(sortedToDos);
-        } else {
-          changeToDosList(loadedToDos);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, [inputs, sort]);
+      setToDos((prevToDos) =>
+        prevToDos.map((todo) => (todo.id === newTodo.id ? newTodo : todo))
+      );
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const deleteToDo = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3000/TodoList/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+      });
+      if (!response.ok) {
+        throw new Error("Ошибка в запросе на сервер");
+      }
+      setToDos((prevToDos) => prevToDos.filter((toDos) => toDos.id !== id));
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const createToDo = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/TodoList", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+        body: JSON.stringify({
+          title: inputs.newToDo,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Ошибка в запросе на сервер");
+      }
+      const newTodo = await response.json();
+      setToDos((prevToDos) => [...prevToDos, newTodo]);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs({ ...inputs, [name]: value });
+  };
+
+  const handleSearch = () => {
+    setIsSearch(true);
+    setCancel(true);
+    setSearh((prevState) => !prevState);
+  };
+
+  const handleCancel = () => {
+    setIsSearch(false);
+    setSearh((prevState) => !prevState);
+    setInputs({ ...inputs, searchToDo: "" });
+    setCancel(false);
+  };
+  const handleSort = () => {
+    setSort((prevState) => !prevState);
+  };
+
+  useEffect(() => {
+    fetchToDos();
+  }, [sort, search]);
+
+  if (isLoading) {
+    return (
+      <>
+        <h1>...loading</h1>
+      </>
+    );
+  }
+  if (error) {
+    return (
+      <>
+        <h1>{error}</h1>
+      </>
+    );
+  }
 
   return (
     <>
       <div>
         <h1>Todo List</h1>
-        <FormAddToDo
-          name="addTodo"
-          label="addTodo"
-          placeholder="Введите важное дело на сегодня..."
-          type="text"
-          value={inputs.addTodo}
-          changeToDosList={changeToDosList}
-          onChange={handleChange}
+        <FormCreateToDo
+          createToDo={createToDo}
+          inputs={inputs}
+          handleChange={handleChange}
         />
-        <FormSearchToDo
+        <FormSearchSortToDo
           name="searchToDo"
-          label="searchToDo"
-          placeholder="Поиск..."
-          type="text"
-          notFound={notFound}
+          placeholder="search"
           value={inputs.searchToDo}
+          cancel={cancel}
           onChange={handleChange}
+          handleSearch={handleSearch}
+          handleCancel={handleCancel}
+          handleSort={handleSort}
         />
-        <ButtonSort handleSort={handleSort} />
-        {isLoading ? (
-          <div>...loading</div>
-        ) : (
-          <ul>
-            {toDos.map((todo) => (
-              <ItemList
-                key={todo.id}
-                todo={todo}
-                changeToDosList={changeToDosList}
-              />
-            ))}
-          </ul>
-        )}
+
+        <ul>
+          {toDos.map((todo) => (
+            <ToDoItem
+              key={todo.id}
+              {...todo}
+              deleteToDo={deleteToDo}
+              updateToDo={updateToDo}
+            />
+          ))}
+        </ul>
       </div>
     </>
   );
