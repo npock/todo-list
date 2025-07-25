@@ -39,7 +39,6 @@ export const ToDoItem = ({ title, id, deleteToDo, updateToDo }) => {
           <div
             style={{
               marginBottom: "15px",
-              marginLeft: "50px",
               display: "flex",
             }}
           >

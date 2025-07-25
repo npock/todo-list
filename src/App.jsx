@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { searchToDos, sortedToDos } from "./utils";
 import { ToDoItem, FormCreateToDo, FormSearchSortToDo } from "./components";
+import { useDebounce } from "./use-debounce";
 
 export const App = () => {
   const [toDos, setToDos] = useState([]);
@@ -10,12 +11,13 @@ export const App = () => {
     newToDo: "",
     searchToDo: "",
   });
-  const [search, setSearh] = useState(false);
-  const [isSearch, setIsSearch] = useState(false);
-  const [sort, setSort] = useState(false);
-  const [cancel, setCancel] = useState(false);
 
-  const fetchToDos = async () => {
+  const [sort, setSort] = useState(false);
+  const [isSort, setIsSort] = useState(false);
+
+  const debouncedSearchToDo = useDebounce(inputs.searchToDo, 1000);
+
+  const fetchSearchSortToDo = async () => {
     setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/TodoList");
@@ -23,22 +25,21 @@ export const App = () => {
         throw new Error("Ошибка в запросе на сервер");
       }
       const data = await response.json();
-      if (isSearch) {
-        setIsSearch(false);
-
-        setToDos(searchToDos(data, inputs));
+      const searchResult = searchToDos(data, inputs.searchToDo);
+      const sortResult = sortedToDos(data);
+      if (sort) {
+        setToDos(sortResult);
       } else {
-        if (sort) {
-          setToDos(sortedToDos(data));
+        if (inputs.searchToDo) {
+          setIsSort(true);
         } else {
-          setToDos(data);
+          setIsSort(false);
         }
+        setToDos(searchResult);
       }
-
       setIsLoading(false);
     } catch (error) {
       setError(error);
-      setIsLoading(false);
     }
   };
 
@@ -103,25 +104,13 @@ export const App = () => {
     setInputs({ ...inputs, [name]: value });
   };
 
-  const handleSearch = () => {
-    setIsSearch(true);
-    setCancel(true);
-    setSearh((prevState) => !prevState);
-  };
-
-  const handleCancel = () => {
-    setIsSearch(false);
-    setSearh((prevState) => !prevState);
-    setInputs({ ...inputs, searchToDo: "" });
-    setCancel(false);
-  };
   const handleSort = () => {
     setSort((prevState) => !prevState);
   };
 
   useEffect(() => {
-    fetchToDos();
-  }, [sort, search]);
+    fetchSearchSortToDo();
+  }, [sort, debouncedSearchToDo]);
 
   if (isLoading) {
     return (
@@ -141,22 +130,28 @@ export const App = () => {
   return (
     <>
       <div>
-        <h1>Todo List</h1>
-        <FormCreateToDo
-          createToDo={createToDo}
-          inputs={inputs}
-          handleChange={handleChange}
-        />
-        <FormSearchSortToDo
-          name="searchToDo"
-          placeholder="search"
-          value={inputs.searchToDo}
-          cancel={cancel}
-          onChange={handleChange}
-          handleSearch={handleSearch}
-          handleCancel={handleCancel}
-          handleSort={handleSort}
-        />
+        <h1 style={{ display: "flex", justifyContent: "center" }}>Todo List</h1>
+        <div
+          style={{
+            display: "block",
+            width: "200px",
+            margin: " auto",
+          }}
+        >
+          <FormCreateToDo
+            createToDo={createToDo}
+            inputs={inputs}
+            handleChange={handleChange}
+          />
+          <FormSearchSortToDo
+            name="searchToDo"
+            placeholder="search"
+            value={inputs.searchToDo}
+            isSort={isSort}
+            onChange={handleChange}
+            handleSort={handleSort}
+          />
+        </div>
 
         <ul>
           {toDos.map((todo) => (

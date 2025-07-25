@@ -1,21 +1,20 @@
 export const FormSearchSortToDo = ({
-  handleSearch,
-  handleCancel,
   handleSort,
-  cancel,
+  isSort,
+
   ...props
 }) => {
   return (
     <>
       <input name={name} {...props} />
-      <button onClick={handleSearch}>search</button>
-      {cancel ? (
-        <button onClick={handleCancel}>cancel</button>
-      ) : (
-        <button style={{ marginLeft: "20px" }} onClick={handleSort}>
-          sort
-        </button>
-      )}
+
+      <button
+        disabled={isSort}
+        style={{ marginLeft: "20px" }}
+        onClick={handleSort}
+      >
+        sort
+      </button>
     </>
   );
 };

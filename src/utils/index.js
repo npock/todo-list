@@ -31,12 +31,9 @@ export const sortedToDos = (data) => {
   });
 };
 
-export const searchToDos = (data, inputs) => {
+export const searchToDos = (data, searchToDo) => {
   return data.filter(({ title, id }) => {
-    let regex = new RegExp(
-      `\\b(${inputs.searchToDo}|${inputs.searchToDo}\\w*)\\b`,
-      "i"
-    );
+    let regex = new RegExp(`\\b(${searchToDo}|${searchToDo}\\w*)\\b`, "i");
     let resultRegex = regex.test(title);
     if (resultRegex) {
       return { title, id };
