@@ -1,4 +1,9 @@
-export const FormCreateToDo = ({ createToDo, inputs, handleChange }) => {
+export const FormCreateToDo = ({
+  isEdeting,
+  createToDo,
+  inputs,
+  handleChange,
+}) => {
   return (
     <form onSubmit={createToDo}>
       <input
@@ -7,7 +12,9 @@ export const FormCreateToDo = ({ createToDo, inputs, handleChange }) => {
         value={inputs.newToDo}
         onChange={handleChange}
       />
-      <button type="submit">add</button>
+      <button disabled={isEdeting} type="submit">
+        add
+      </button>
     </form>
   );
 };

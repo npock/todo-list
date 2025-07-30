@@ -32,11 +32,22 @@ export const sortedToDos = (data) => {
 };
 
 export const searchToDos = (data, searchToDo) => {
-  return data.filter(({ title, id }) => {
+  console.log(data);
+  let regex = new RegExp(`\\b(${searchToDo}|${searchToDo}\\w*)\\b`, "i");
+
+  let filterdata = {};
+  for (let key in data) {
+    let resultRegex = regex.test(key.title);
+    if (resultRegex) {
+    }
+  }
+  const newData = Object.entries(data).filter(([id, { title }]) => {
+    console.log(id, title);
     let regex = new RegExp(`\\b(${searchToDo}|${searchToDo}\\w*)\\b`, "i");
     let resultRegex = regex.test(title);
     if (resultRegex) {
-      return { title, id };
+      return [id, { title }];
     }
   });
+  console.log(newData);
 };
