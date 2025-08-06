@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useContext } from "react";
+import { use } from "react";
 import { AppContext } from "../../context";
 
 export const FormToDoUpdateDelete = ({ id, title, handleEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const { deleteToDo } = useContext(AppContext);
+  const { deleteToDo } = use(AppContext);
 
   const onDelete = async () => {
     setIsDeleting(true);

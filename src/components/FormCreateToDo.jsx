@@ -1,4 +1,8 @@
-export const FormCreateToDo = ({ createToDo, inputs, handleChange }) => {
+import { use } from "react";
+import { AppContext } from "../context";
+
+export const FormCreateToDo = () => {
+  const { createToDo, handleChange, inputs } = use(AppContext);
   return (
     <form onSubmit={createToDo}>
       <input

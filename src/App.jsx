@@ -140,32 +140,29 @@ export const App = () => {
   }
 
   return (
-    <AppContext value={{ deleteToDo, updateToDo }}>
-      <>
-        <div>
-          <h1>Todo List</h1>
-          <FormCreateToDo
-            createToDo={createToDo}
-            inputs={inputs}
-            handleChange={handleChange}
-          />
-          <FormSearchSortToDo
-            name="searchToDo"
-            placeholder="search"
-            value={inputs.searchToDo}
-            cancel={cancel}
-            onChange={handleChange}
-            handleSearch={handleSearch}
-            handleCancel={handleCancel}
-            handleSort={handleSort}
-          />
-          <ul>
-            {toDos.map((todo) => (
-              <ToDoItem key={todo.id} {...todo} />
-            ))}
-          </ul>
-        </div>
-      </>
+    <AppContext
+      value={{
+        deleteToDo,
+        updateToDo,
+        createToDo,
+        handleChange,
+        handleSearch,
+        handleCancel,
+        handleSort,
+        inputs,
+        cancel,
+      }}
+    >
+      <div>
+        <h1>Todo List</h1>
+        <FormCreateToDo />
+        <FormSearchSortToDo />
+        <ul>
+          {toDos.map((todo) => (
+            <ToDoItem key={todo.id} {...todo} />
+          ))}
+        </ul>
+      </div>
     </AppContext>
   );
 };

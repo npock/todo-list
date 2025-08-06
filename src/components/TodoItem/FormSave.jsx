@@ -1,8 +1,8 @@
-import { useContext } from "react";
+import { use } from "react";
 import { AppContext } from "../../context";
 
 export const FormSave = ({ title, onChange, handleEdit, id, data }) => {
-  const { updateToDo } = useContext(AppContext);
+  const { updateToDo } = use(AppContext);
 
   const onSave = async () => {
     await updateToDo(id, data).finally(() => handleEdit());
