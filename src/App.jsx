@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { searchToDos, sortedToDos } from "./utils";
 import { ToDoItem, FormCreateToDo, FormSearchSortToDo } from "./components";
+import { AppContext } from "./context";
 
 export const App = () => {
   const [toDos, setToDos] = useState([]);
@@ -139,36 +140,32 @@ export const App = () => {
   }
 
   return (
-    <>
-      <div>
-        <h1>Todo List</h1>
-        <FormCreateToDo
-          createToDo={createToDo}
-          inputs={inputs}
-          handleChange={handleChange}
-        />
-        <FormSearchSortToDo
-          name="searchToDo"
-          placeholder="search"
-          value={inputs.searchToDo}
-          cancel={cancel}
-          onChange={handleChange}
-          handleSearch={handleSearch}
-          handleCancel={handleCancel}
-          handleSort={handleSort}
-        />
-
-        <ul>
-          {toDos.map((todo) => (
-            <ToDoItem
-              key={todo.id}
-              {...todo}
-              deleteToDo={deleteToDo}
-              updateToDo={updateToDo}
-            />
-          ))}
-        </ul>
-      </div>
-    </>
+    <AppContext value={{ deleteToDo, updateToDo }}>
+      <>
+        <div>
+          <h1>Todo List</h1>
+          <FormCreateToDo
+            createToDo={createToDo}
+            inputs={inputs}
+            handleChange={handleChange}
+          />
+          <FormSearchSortToDo
+            name="searchToDo"
+            placeholder="search"
+            value={inputs.searchToDo}
+            cancel={cancel}
+            onChange={handleChange}
+            handleSearch={handleSearch}
+            handleCancel={handleCancel}
+            handleSort={handleSort}
+          />
+          <ul>
+            {toDos.map((todo) => (
+              <ToDoItem key={todo.id} {...todo} />
+            ))}
+          </ul>
+        </div>
+      </>
+    </AppContext>
   );
 };
