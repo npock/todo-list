@@ -4,7 +4,7 @@ import { AppContext } from "../context";
 export const FormCreateToDo = () => {
   const { createToDo, handleChange, inputs } = use(AppContext);
   return (
-    <form onSubmit={createToDo}>
+    <form onSubmit={() => createToDo(inputs.newToDo)}>
       <input
         name="newToDo"
         placeholder="whrite important toDo..."
