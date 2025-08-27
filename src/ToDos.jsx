@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ToDoItem, FormCreateToDo, FormSearchSortToDo } from "./components";
 //import { useData } from "./useData/useData";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTodos } from "./store/createStore";
+import { fetchTodos, searchFetchToDos } from "./store/createStore";
 
 export const ToDos = () => {
   const [search, setSearh] = useState(false);
@@ -22,11 +22,12 @@ export const ToDos = () => {
 
   const handleSearch = () => {
     setCancel(true);
-    setSearh((prevState) => !prevState);
+    dispatch(searchFetchToDos(inputs.searchToDo));
   };
 
   const handleCancel = () => {
     setSearh((prevState) => !prevState);
+    dispatch(fetchTodos());
     setInputs({ ...inputs, searchToDo: "" });
     setCancel(false);
   };
@@ -35,8 +36,8 @@ export const ToDos = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchTodos(search, sort, inputs.searchToDo));
-  }, [search, sort]);
+    dispatch(fetchTodos(sort));
+  }, [sort]);
 
   if (isLoading) {
     return (

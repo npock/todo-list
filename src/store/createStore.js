@@ -29,6 +29,12 @@ const appReducer = (state = initialState, { type, payload }) => {
         todos: state.todos.filter((todo) => todo.id !== payload),
       };
     }
+    case "SEARCH__TODO": {
+      return {
+        ...state,
+        todos: payload,
+      };
+    }
     case "ADD__TODO__LOADING": {
       return {
         ...state,
@@ -104,7 +110,22 @@ const appReducer = (state = initialState, { type, payload }) => {
   }
 };
 
-export const fetchTodos = (search, sort, searchTodo) => async (dispatch) => {
+export const searchFetchToDos = (searchToDo) => async (dispatch) => {
+  try {
+    const response = await fetch("http://localhost:3000/TodoList");
+    if (!response.ok) {
+      throw new Error("Something went wrong");
+    }
+    const data = await response.json();
+    const newTodos = searchToDos(data, searchToDo);
+
+    dispatch({ type: "SEARCH__TODO", payload: newTodos });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const fetchTodos = (sort) => async (dispatch) => {
   dispatch({
     type: "FETCH__TODOS__LOADING",
     payload: true,
@@ -115,23 +136,17 @@ export const fetchTodos = (search, sort, searchTodo) => async (dispatch) => {
       throw new Error("Something went wrong");
     }
     const data = await response.json();
-    if (search) {
+
+    if (sort) {
       dispatch({
         type: "FETCH__TODOS__SUCCESS",
-        payload: { todos: searchToDos(data, searchTodo), isLoading: false },
+        payload: { todos: sortedToDos(data), isLoading: false },
       });
     } else {
-      if (sort) {
-        dispatch({
-          type: "FETCH__TODOS__SUCCESS",
-          payload: { todos: sortedToDos(data), isLoading: false },
-        });
-      } else {
-        dispatch({
-          type: "FETCH__TODOS__SUCCESS",
-          payload: { todos: data, isLoading: false },
-        });
-      }
+      dispatch({
+        type: "FETCH__TODOS__SUCCESS",
+        payload: { todos: data, isLoading: false },
+      });
     }
   } catch (error) {
     dispatch({
