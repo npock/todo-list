@@ -26,7 +26,7 @@ export const ToDos = () => {
   };
 
   const handleCancel = () => {
-    setSearh((prevState) => !prevState);
+    //setSearh((prevState) => !prevState);
     dispatch(fetchTodos());
     setInputs({ ...inputs, searchToDo: "" });
     setCancel(false);
