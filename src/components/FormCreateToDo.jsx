@@ -1,6 +1,15 @@
-export const FormCreateToDo = ({ createToDo, inputs, handleChange }) => {
+import { createTodoAsync } from "../store/createStore";
+import { useDispatch } from "react-redux";
+
+export const FormCreateToDo = ({ inputs, handleChange }) => {
+  const dispatch = useDispatch();
+
+  const createToDo = () => {
+    dispatch(createTodoAsync(inputs.newToDo));
+  };
+
   return (
-    <form onSubmit={createToDo}>
+    <form onSubmit={() => createToDo(inputs.newToDo)}>
       <input
         name="newToDo"
         placeholder="whrite important toDo..."

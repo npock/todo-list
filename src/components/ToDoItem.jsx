@@ -1,24 +1,27 @@
 import { useState } from "react";
+//import { useData } from "../useData/useData";
+import { useDispatch, useSelector } from "react-redux";
+import { updateTodoAsync, deleteTodoAsync } from "../store/createStore";
 
-export const ToDoItem = ({ title, id, deleteToDo, updateToDo }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
+export const ToDoItem = ({ title, id }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [data, setData] = useState({
     title,
   });
 
-  const onDelete = async () => {
-    setIsDeleting(true);
-    await deleteToDo(id);
-    setIsDeleting(false);
+  const isLoading = useSelector((state) => state.isLoading);
+  const dispatch = useDispatch();
+
+  const deleteToDo = () => {
+    dispatch(deleteTodoAsync(id));
   };
 
   const handleEdit = () => {
     setIsEdit((prevState) => !prevState);
   };
 
-  const onSave = () => {
-    updateToDo(id, data).finally(() => handleEdit());
+  const onSave = async () => {
+    dispatch(updateTodoAsync(id, data)).finally(handleEdit);
   };
 
   const onChange = (e) => {
@@ -43,7 +46,7 @@ export const ToDoItem = ({ title, id, deleteToDo, updateToDo }) => {
               display: "flex",
             }}
           >
-            {isDeleting ? <span>...deleting</span> : <li>{title}</li>}
+            {isLoading ? <span>...deleting</span> : <li>{title}</li>}
 
             <button onClick={handleEdit}>update</button>
 
@@ -51,8 +54,8 @@ export const ToDoItem = ({ title, id, deleteToDo, updateToDo }) => {
               style={{
                 marginLeft: "10px",
               }}
-              onClick={onDelete}
-              disabled={isDeleting}
+              onClick={deleteToDo}
+              disabled={isLoading}
             >
               delete
             </button>

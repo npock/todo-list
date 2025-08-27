@@ -3,11 +3,17 @@ export const FormSearchSortToDo = ({
   handleCancel,
   handleSort,
   cancel,
-  ...props
+  handleChange,
+  inputs,
 }) => {
   return (
     <>
-      <input name={name} {...props} />
+      <input
+        name="searchToDo"
+        placeholder="search"
+        value={inputs.searchToDo}
+        onChange={handleChange}
+      />
       <button onClick={handleSearch}>search</button>
       {cancel ? (
         <button onClick={handleCancel}>cancel</button>
